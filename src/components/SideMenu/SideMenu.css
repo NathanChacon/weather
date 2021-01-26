@@ -1,0 +1,18 @@
+.side-menu-container{
+    min-height: 100vh;
+    max-width: 400px;
+    min-width: 300px;
+}
+
+.actions-container{
+    width: 100%;
+}
+
+.clouds-container{
+    position: relative;
+    background-image: url('../../assets/imgs/Cloud-background.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    width: 100%;
+}
