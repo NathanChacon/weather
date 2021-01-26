@@ -1,4 +1,5 @@
 .side-menu-container{
+    position: relative;
     min-height: 100vh;
     max-width: 400px;
     min-width: 300px;
@@ -15,4 +16,10 @@
     background-position: center;
     background-size: cover;
     width: 100%;
+}
+
+.bottom-container{
+    width: 100%;
+    position: absolute;
+    bottom: 10px;
 }

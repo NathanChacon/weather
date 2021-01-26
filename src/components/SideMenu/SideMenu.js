@@ -3,12 +3,13 @@ import Button from '@material-ui/core/Button/Button'
 import mainCloudImg from '../../assets/imgs/Shower.png'
 import Typography from '@material-ui/core/Typography'
 import { useState, useEffect} from 'react'
+import PlaceIcon from '@material-ui/icons/Place';
 import './SideMenu.css'
 function SideMenu(props){
     const [weatherConfig, setWeatherConfig] = useState(props.weatherConfig)
     useEffect(() => {
-        setWeatherConfig(weatherConfig)
-    }, [props.weatherConfig])
+        setWeatherConfig(props.weatherConfig)
+    }, [props])
     return (
         <Box className="side-menu-container" component="div" bgcolor="primary.light" color="primary.contrastText">
             <Box className="actions-container" display="flex" justifyContent="space-between" p={3} pt={2}>
@@ -36,16 +37,19 @@ function SideMenu(props){
                     {weatherConfig.situation}
                 </Typography>
             </Box>
-            <Box className="date-container">
-                <Typography>
-                    {weatherConfig.dateTitle} . {weatherConfig.dateNumber}
-                </Typography>
-                
-            </Box>
-            <Box className="local-container">
-                <Typography>
-                    {weatherConfig.local}
-                </Typography>
+            <Box className="bottom-container" display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+                <Box className="date-container">
+                    <Typography>
+                        {weatherConfig.dateTitle} . {weatherConfig.dateNumber}
+                    </Typography>
+                    
+                </Box>
+                <Box className="local-container" display="flex" alignItems="center" justifyContent="center" >
+                    <PlaceIcon></PlaceIcon>
+                    <Typography>
+                        {weatherConfig.local}
+                    </Typography>
+                </Box>
             </Box>
         </Box>
     )
