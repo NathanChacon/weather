@@ -1,34 +1,77 @@
 import './Home.css'
 import Box from '@material-ui/core/Box/Box'
 import SideMenu from '../../components/SideMenu/SideMenu'
+import WeatherCard from '../../components/WeatherCard/WeatherCard'
 import { useEffect, useState } from 'react'
 import Api from '../../utils/api/api'
+import { Typography } from '@material-ui/core'
 function Home(){
-    const [weatherConfig, setWeatherConfig] = useState({})
+    const [todayWeather, setTodayWeather] = useState({
+        temperature: {
+            default:null,
+            min: null,
+            max: null
+        },
+        local: null,
+        situation: null,
+        date: {
+            title: null,
+            fullDate: null
+        },
+        imgUrl: null,
+        hightlights: {
+            wind: null,
+            humidity: null,
+            airPressure: null,
+            visibility: null
+        }
+    })
+    const [weathers, setWeathers] = useState([])
+
     useEffect(() => {
-        startSideMenuData()
+        startWeatherData()
     },[])
 
-    const startSideMenuData = async () => {
+    const startWeatherData = async () => {
         try{
-            const currentPosition = await getCurrentPosition()
-            const woid = await getWoid(currentPosition.coords.latitude, currentPosition.coords.longitude)
-            const weatherRawData = await getWeatherInfoByWoid(woid)
-            const firstWeather = weatherRawData.consolidated_weather.shift()
-            const weather = weatherFactory(
-                firstWeather.the_temp, 
-                weatherRawData.title, 
-                firstWeather.weather_state_name, 
-                new Date(firstWeather.applicable_date), 
-                'today'
-            )
-            console.log(weather)
-            setWeatherConfig(prev => {return {...weather}})
-            console.log(weatherConfig)
+            const position = await getCurrentPosition()
+            const rawWeathers = await getWeathers(position.coords.latitude, position.coords.longitude)
+            const weathers = getFormattedWeathers(rawWeathers)
+            const todayWeather = weathers.shift()
+            setTodayWeather((prevState) => ({...prevState, ...todayWeather}))
+            setWeathers((prevState) => (weathers))
         }
         catch(error){
-            console.log(error)
+            console.log('error', error)
         }
+    }
+
+    const getWeathers = async (lat, long) => {
+        const woid = await getWoid(lat, long)
+        const weatherRawData = await getWeatherInfoByWoid(woid)
+        return weatherRawData
+    }
+
+    const getFormattedWeathers = (rawWeathers) => {
+        const formattedWeathers = []
+        rawWeathers.consolidated_weather.forEach(rawWeather => {
+            const img = `https://www.metaweather.com/static/img/weather/${rawWeather.weather_state_abbr}.svg`
+            const date = dateFactory('teste', getFormattedDate(new Date(rawWeather.applicable_date).toUTCString())) 
+            const temperature = temperatureFactory(Math.floor(rawWeather.the_temp), Math.floor(rawWeather.max_temp),  Math.floor(rawWeather.min_temp))
+            const hightlights = hightlightsFactory(rawWeather.wind_speed, rawWeather.humidity, rawWeather.airPressure)
+
+            const weather = weatherFactory(
+                temperature, 
+                rawWeathers.title, 
+                rawWeather.weather_state_name, 
+                date, 
+                img,
+                hightlights
+            )
+           formattedWeathers.push(weather)
+        })
+
+        return formattedWeathers
     }
 
     const getCurrentPosition = () => {
@@ -52,7 +95,6 @@ function Home(){
                 resolve(woeid)
             }
             catch(error){
-                console.log(error)
                 reject("Cannot get woid")
             }
         })
@@ -62,7 +104,6 @@ function Home(){
         return new Promise(async (resolve, reject) => {
             try{
                 const response = await Api.get(`location/${woid}`)
-                console.log("response teste", response)
                 resolve(response.data)
             }
             catch(error){
@@ -71,19 +112,65 @@ function Home(){
         })
     }
 
-    const weatherFactory = (temperature, local, situation, dateNumber, dateTitle) => {
+    const weatherFactory = (temperature, local, situation, date, imgUrl, hightlights) => {
         return {
             temperature,
             local,
             situation,
-            dateNumber,
-            dateTitle
+            date,
+            imgUrl,
+            hightlights
         }
     }
 
+    const temperatureFactory = (defaultTemp, max, min) => {
+        return {
+            default: defaultTemp,
+            max,
+            min
+        }
+    }
+
+    const hightlightsFactory = (wind, humidity, airPressure, visibility) => {
+        return {
+            wind,
+            humidity,
+            airPressure,
+            visibility
+        }
+    }
+
+    const dateFactory = (title, fullDate) => {
+        return {
+            title,
+            fullDate
+        }
+    }
+
+    const getFormattedDate = (utcDate) => {
+        const dateArray = utcDate.split(' ')
+        return dateArray[0] + dateArray[1] + dateArray[2]
+    }
+
     return (
-        <Box component="section" className="home-container" bgcolor="primary.dark" color="primary.contrastText">
-            <SideMenu weatherConfig = {weatherConfig}></SideMenu>
+        <Box component="section" className="home-container" display="flex" bgcolor="primary.dark" color="primary.contrastText">
+            <SideMenu weatherConfig = {todayWeather}></SideMenu>
+            <Box className="main-content">
+                <Box className="cards-container" display="flex" alignItems="center" justifyContent="center">
+                    {
+                        weathers.map((weather, index) => {
+                            return <WeatherCard key={index} weatherConfig = {weather}></WeatherCard>
+                        })
+                    }
+                </Box>
+                <Box className="cards-hightlights-container" display="flex" alignItems="center" justifyContent="center">
+                    <Box className="teste">
+                        <Typography variant="h5">
+                            Today`s HightLights
+                        </Typography>
+                    </Box>
+                </Box>
+            </Box>
         </Box> 
     )
 }

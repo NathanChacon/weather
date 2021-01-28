@@ -1,0 +1,14 @@
+.weather-card{
+    width: 120px;
+    height: 177px;
+}
+
+.weather-image{
+    width: 100%;
+    height: 75%;
+}
+
+.weather-image img{
+    width: 56px;
+    height: 64px;
+}

@@ -2,3 +2,16 @@
     width: 100%;
     min-height: 100vh;
 }
+
+.main-content{
+    width: 100%;
+}
+
+.cards-container{
+    width: 100%;
+    min-height: 50vh;
+}
+
+.cards-container .weather-card{
+    margin-right: 10px;
+}

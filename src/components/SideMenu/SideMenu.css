@@ -1,8 +1,8 @@
 .side-menu-container{
     position: relative;
     min-height: 100vh;
-    max-width: 400px;
-    min-width: 300px;
+    width: 400px;
+    flex-shrink: 0;
 }
 
 .actions-container{
@@ -16,6 +16,11 @@
     background-position: center;
     background-size: cover;
     width: 100%;
+}
+
+.clouds-container .cloud-img{
+    width: 250px;
+    height: 250px;
 }
 
 .bottom-container{
