@@ -2,9 +2,11 @@ import './Home.css'
 import Box from '@material-ui/core/Box/Box'
 import SideMenu from '../../components/SideMenu/SideMenu'
 import WeatherCard from '../../components/WeatherCard/WeatherCard'
+import HightlightCard from '../../components/HightlightCard/HightlightCard'
 import { useEffect, useState } from 'react'
 import Api from '../../utils/api/api'
 import { Typography } from '@material-ui/core'
+import Grid from '@material-ui/core/Grid';
 function Home(){
     const [todayWeather, setTodayWeather] = useState({
         temperature: {
@@ -27,7 +29,7 @@ function Home(){
         }
     })
     const [weathers, setWeathers] = useState([])
-
+    const [hightlights, setHightlights] = useState([])
     useEffect(() => {
         startWeatherData()
     },[])
@@ -38,8 +40,11 @@ function Home(){
             const rawWeathers = await getWeathers(position.coords.latitude, position.coords.longitude)
             const weathers = getFormattedWeathers(rawWeathers)
             const todayWeather = weathers.shift()
+            const hightlightsCardsConfig = getHightlightsCardsConfig(todayWeather)
             setTodayWeather((prevState) => ({...prevState, ...todayWeather}))
             setWeathers((prevState) => (weathers))
+            setHightlights((prevState) => (hightlightsCardsConfig))
+            console.log(hightlights)
         }
         catch(error){
             console.log('error', error)
@@ -58,7 +63,7 @@ function Home(){
             const img = `https://www.metaweather.com/static/img/weather/${rawWeather.weather_state_abbr}.svg`
             const date = dateFactory('teste', getFormattedDate(new Date(rawWeather.applicable_date).toUTCString())) 
             const temperature = temperatureFactory(Math.floor(rawWeather.the_temp), Math.floor(rawWeather.max_temp),  Math.floor(rawWeather.min_temp))
-            const hightlights = hightlightsFactory(rawWeather.wind_speed, rawWeather.humidity, rawWeather.airPressure)
+            const hightlights = hightlightsFactory(rawWeather.wind_speed, rawWeather.humidity, rawWeather.air_pressure, Math.floor(rawWeather.visibility))
 
             const weather = weatherFactory(
                 temperature, 
@@ -112,6 +117,27 @@ function Home(){
         })
     }
 
+    const getHightlightsCardsConfig = (todayWeather) => {
+        return [
+            {
+                header:'Wind status',
+                title: Math.floor(todayWeather.hightlights.wind)
+            },
+            {
+                header:'Humidity',
+                title: todayWeather.hightlights.humidity
+            },
+            {
+                header:'Visibility',
+                title: todayWeather.hightlights.visibility
+            },
+            {   
+                header: 'Air pressure',
+                title: todayWeather.hightlights.airPressure
+            }
+        ]
+    }
+
     const weatherFactory = (temperature, local, situation, date, imgUrl, hightlights) => {
         return {
             temperature,
@@ -155,19 +181,30 @@ function Home(){
     return (
         <Box component="section" className="home-container" display="flex" bgcolor="primary.dark" color="primary.contrastText">
             <SideMenu weatherConfig = {todayWeather}></SideMenu>
-            <Box className="main-content">
-                <Box className="cards-container" display="flex" alignItems="center" justifyContent="center">
-                    {
-                        weathers.map((weather, index) => {
-                            return <WeatherCard key={index} weatherConfig = {weather}></WeatherCard>
-                        })
-                    }
-                </Box>
-                <Box className="cards-hightlights-container" display="flex" alignItems="center" justifyContent="center">
-                    <Box className="teste">
-                        <Typography variant="h5">
-                            Today`s HightLights
-                        </Typography>
+            <Box className="main-wrapper" display="flex" justifyContent="center">
+                <Box className="main-content" pt={5} paddingBottom={5}>
+                    <Grid container className="cards-container" spacing={2}>
+                        {
+                            weathers.map((weather, index) => {
+                                return <Grid item xs={6} sm={6} md={6} lg={4}>
+                                            <WeatherCard key={index} weatherConfig = {weather}></WeatherCard>
+                                        </Grid> 
+                            })
+                        }
+                    </Grid>
+                    <Box className="cards-hightlights-container" style={{width:"100%"}} display="flex" flexDirection="column" mt={3}>
+                        <Box style={{width:'100%'}} mb={2}>
+                            <Typography variant="h5">
+                                Today`s HightLights
+                            </Typography>
+                        </Box>
+                        <Grid container spacing={2}>
+                            {
+                                hightlights.map((hightlight, index) => {
+                                    return <Grid item xs={12} sm={12} md={12} lg={6}><HightlightCard hightlight = {hightlight} key={index} width="100%"></HightlightCard></Grid>
+                                })
+                            }
+                        </Grid>
                     </Box>
                 </Box>
             </Box>

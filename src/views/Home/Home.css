@@ -3,8 +3,13 @@
     min-height: 100vh;
 }
 
-.main-content{
+.main-wrapper{
     width: 100%;
+    min-height: 100vh;
+}
+
+.main-content{
+    width: 60%;
 }
 
 .cards-container{
@@ -14,4 +19,18 @@
 
 .cards-container .weather-card{
     margin-right: 10px;
+}
+
+.hightlights-container .hightlight-card-container{
+    margin-right: 15px;
+    margin-bottom: 15px;
+}
+
+@media (max-width:1024px){
+    .home-container{
+        flex-direction: column;
+    }
+    .main-content{
+        width: 85%;
+    }
 }
