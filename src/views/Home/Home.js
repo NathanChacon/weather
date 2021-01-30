@@ -1,6 +1,7 @@
 import './Home.css'
 import Box from '@material-ui/core/Box/Box'
 import SideMenu from '../../components/SideMenu/SideMenu'
+import SearchMenu from '../../components/SearchMenu/SearchMenu'
 import WeatherCard from '../../components/WeatherCard/WeatherCard'
 import HightlightCard from '../../components/HightlightCard/HightlightCard'
 import { useEffect, useState } from 'react'
@@ -31,7 +32,8 @@ function Home(){
     })
     const [weathers, setWeathers] = useState([null,null,null,null,null])
     const [hightlights, setHightlights] = useState([null,null,null,null])
-    
+    const [isSearchMenuOpen, setIsSearchMenuOpen] = useState(false)
+
     useEffect(() => {
         startWeatherData()
     },[])
@@ -41,9 +43,11 @@ function Home(){
             const position = await getCurrentPosition()
             const rawWeathers = await getWeathers(position.coords.latitude, position.coords.longitude)
             const weathers = getFormattedWeathers(rawWeathers)
-            const todayWeather = weathers.shift()
-            const hightlightsCardsConfig = getHightlightsCardsConfig(todayWeather)
-            setTodayWeather((prevState) => ({...prevState, ...todayWeather}))
+            const todayWeatherAux = weathers.shift()
+            const hightlightsCardsConfig = getHightlightsCardsConfig(todayWeatherAux)
+            console.log("teste", todayWeatherAux)
+            setTodayWeather((prevState) => ({...prevState, ...todayWeatherAux}))
+            console.log("teste2", todayWeather)
             setWeathers((prevState) => (weathers))
             setHightlights((prevState) => (hightlightsCardsConfig))
         }
@@ -52,8 +56,8 @@ function Home(){
         }
     }
 
-    const onClickSearch = () => {
-        console.log('parent called')
+    const onOpenSearchMenu = () => {
+        setIsSearchMenuOpen(true)
     }
 
     const getWeathers = async (lat, long) => {
@@ -185,7 +189,7 @@ function Home(){
 
     return (
         <Box component="section" className="home-container" display="flex" bgcolor="primary.dark" color="primary.contrastText">
-            <SideMenu weatherConfig = {todayWeather} onSearch={onClickSearch}></SideMenu>
+            <SideMenu weatherConfig = {todayWeather} onOpenSearchMenu={onOpenSearchMenu}></SideMenu>
             <Box className="main-wrapper" display="flex" justifyContent="center">
                 <Box className="main-content" pt={5} paddingBottom={5}>
                     <Grid container className="cards-container" spacing={2}>
@@ -224,6 +228,7 @@ function Home(){
                     </Box>
                 </Box>
             </Box>
+            <SearchMenu open={isSearchMenuOpen}></SearchMenu>
         </Box> 
     )
 }

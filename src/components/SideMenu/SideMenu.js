@@ -11,14 +11,14 @@ function SideMenu(props){
         setWeatherConfig(props.weatherConfig)
     }, [props])
     
-    const onSearch = () => {
-        props.onSearch()
+    const onOpenSearchMenu = () => {
+        props.onOpenSearchMenu()
     }
 
     return (
         <Box className="side-menu-container" component="div" bgcolor="primary.light" color="primary.contrastText" display="flex" flexDirection="column" alignItems="center">
             <Box className="actions-container" display="flex" justifyContent="space-between" p={3} pt={2}>
-                <Button variant="contained"  color="primary" onClick={() => {onSearch()}}>
+                <Button variant="contained"  color="primary" onClick={() => {onOpenSearchMenu()}}>
                     <Typography variant="button">
                         Search for places
                     </Typography>
@@ -61,22 +61,21 @@ function SideMenu(props){
                     <Typography variant="body2" style={{width:'100%'}}>
                         {
                             weatherConfig.date.title && weatherConfig.date.fullDate ?
-                            weatherConfig.date.title . weatherConfig.date.fullDate
+                            weatherConfig.date.title + '.' + weatherConfig.date.fullDate
                             :
                             <Skeleton width="100%" variant="text"></Skeleton>
                         }
                     </Typography>
                 </Box>
-                <Box style={{width: '100%'}} >
-                    {weatherConfig.local ? <PlaceIcon></PlaceIcon> : ''}
+                <Box style={{width: '100%'}} mt={4}>
+                {
+                    weatherConfig.local ?
                     <Typography variant="body2" style={{width: '100%'}}>
-                        {
-                            weatherConfig.local ? 
-                            weatherConfig.local 
-                            :
-                            <Skeleton width="100%" variant="text"></Skeleton>
-                        }
+                    <PlaceIcon></PlaceIcon>{weatherConfig.local}
                     </Typography>
+                    :
+                    <Skeleton width="100%" variant="text"></Skeleton>
+                }
                 </Box>
             </Box>
         </Box>
