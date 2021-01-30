@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import Api from '../../utils/api/api'
 import { Typography } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid';
+import Skeleton from '@material-ui/lab/Skeleton';
 function Home(){
     const [todayWeather, setTodayWeather] = useState({
         temperature: {
@@ -28,8 +29,9 @@ function Home(){
             visibility: null
         }
     })
-    const [weathers, setWeathers] = useState([])
-    const [hightlights, setHightlights] = useState([])
+    const [weathers, setWeathers] = useState([null,null,null,null,null])
+    const [hightlights, setHightlights] = useState([null,null,null,null])
+    
     useEffect(() => {
         startWeatherData()
     },[])
@@ -44,11 +46,14 @@ function Home(){
             setTodayWeather((prevState) => ({...prevState, ...todayWeather}))
             setWeathers((prevState) => (weathers))
             setHightlights((prevState) => (hightlightsCardsConfig))
-            console.log(hightlights)
         }
         catch(error){
             console.log('error', error)
         }
+    }
+
+    const onClickSearch = () => {
+        console.log('parent called')
     }
 
     const getWeathers = async (lat, long) => {
@@ -180,14 +185,18 @@ function Home(){
 
     return (
         <Box component="section" className="home-container" display="flex" bgcolor="primary.dark" color="primary.contrastText">
-            <SideMenu weatherConfig = {todayWeather}></SideMenu>
+            <SideMenu weatherConfig = {todayWeather} onSearch={onClickSearch}></SideMenu>
             <Box className="main-wrapper" display="flex" justifyContent="center">
                 <Box className="main-content" pt={5} paddingBottom={5}>
                     <Grid container className="cards-container" spacing={2}>
                         {
                             weathers.map((weather, index) => {
                                 return <Grid item xs={6} sm={6} md={6} lg={4}>
-                                            <WeatherCard key={index} weatherConfig = {weather}></WeatherCard>
+                                            {weather ? 
+                                                <WeatherCard key={index} weatherConfig = {weather}></WeatherCard>
+                                                :
+                                                <Skeleton height="177px" />
+                                            }
                                         </Grid> 
                             })
                         }
@@ -201,7 +210,14 @@ function Home(){
                         <Grid container spacing={2}>
                             {
                                 hightlights.map((hightlight, index) => {
-                                    return <Grid item xs={12} sm={12} md={12} lg={6}><HightlightCard hightlight = {hightlight} key={index} width="100%"></HightlightCard></Grid>
+                                    return<Grid item xs={12} sm={12} md={12} lg={6}>
+                                            {
+                                                hightlight ?
+                                                <HightlightCard hightlight = {hightlight} key={index} width="100%"></HightlightCard>
+                                                :
+                                                <Skeleton height="200px" />
+                                             }
+                                            </Grid>
                                 })
                             }
                         </Grid>

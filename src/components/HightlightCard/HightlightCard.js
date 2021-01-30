@@ -5,6 +5,7 @@ import { useState, useEffect} from 'react'
 function  HightlightCard (props){
     const [hightlight, setHightlight] = useState(props.hightlight)
     const [width, setWidth] = useState(props.width)
+    
     useEffect(() => {
        setHightlight(props.hightlight)
        setWidth(props.width)
