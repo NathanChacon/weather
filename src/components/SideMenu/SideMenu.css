@@ -5,7 +5,7 @@
     flex-shrink: 0;
 }
 
-.side-menu-container h1,h2,h3,h4,h5,h6,p{
+.side-menu-container{
     text-align: center;
 }
 
@@ -25,12 +25,6 @@
 .clouds-container .cloud-img{
     width: 250px;
     height: 250px;
-}
-
-.bottom-container{
-    width: 100%;
-    position: absolute;
-    bottom: 10px;
 }
 
 @media (max-width:1024px){

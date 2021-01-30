@@ -60,6 +60,10 @@ function Home(){
         setIsSearchMenuOpen(true)
     }
 
+    const onCloseSearchMenu = () => {
+        setIsSearchMenuOpen(false)
+    }
+
     const getWeathers = async (lat, long) => {
         const woid = await getWoid(lat, long)
         const weatherRawData = await getWeatherInfoByWoid(woid)
@@ -199,7 +203,7 @@ function Home(){
                                             {weather ? 
                                                 <WeatherCard key={index} weatherConfig = {weather}></WeatherCard>
                                                 :
-                                                <Skeleton height="177px" />
+                                                <Skeleton height='100%' animation="wave"/>
                                             }
                                         </Grid> 
                             })
@@ -219,7 +223,7 @@ function Home(){
                                                 hightlight ?
                                                 <HightlightCard hightlight = {hightlight} key={index} width="100%"></HightlightCard>
                                                 :
-                                                <Skeleton height="200px" />
+                                                <Skeleton height="200px" animation="wave"/>
                                              }
                                             </Grid>
                                 })
@@ -228,7 +232,7 @@ function Home(){
                     </Box>
                 </Box>
             </Box>
-            <SearchMenu open={isSearchMenuOpen}></SearchMenu>
+            <SearchMenu open={isSearchMenuOpen} onClose={onCloseSearchMenu}></SearchMenu>
         </Box> 
     )
 }
