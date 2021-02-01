@@ -11,6 +11,9 @@ const theme = createMuiTheme({
     secondary: {
       main: '#01579b',
     }
+  },
+  typography: {
+    "fontFamily": `"Raleway", "Roboto", "Helvetica", "Arial", sans-serif`,
   }
 })
 
