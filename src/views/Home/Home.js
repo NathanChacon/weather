@@ -33,21 +33,27 @@ function Home(){
     const [weathers, setWeathers] = useState([null,null,null,null,null])
     const [hightlights, setHightlights] = useState([null,null,null,null])
     const [isSearchMenuOpen, setIsSearchMenuOpen] = useState(false)
+    const [places, setPlaces] = useState([])
 
     useEffect(() => {
-        startWeatherData()
+        setWeatherOfCurrentLocation()
     },[])
 
-    const startWeatherData = async () => {
+    const setWeatherOfCurrentLocation = async () => {
+        const position = await getCurrentPosition()
+        const woeid = await getWoeid(position.coords.latitude, position.coords.longitude)
+        startWeatherData(woeid)
+    }
+
+    const startWeatherData = async (woeid) => {
         try{
-            const position = await getCurrentPosition()
-            const rawWeathers = await getWeathers(position.coords.latitude, position.coords.longitude)
+            setSkeletons()
+            const rawWeathers = await getWeathers(woeid)
             const weathers = getFormattedWeathers(rawWeathers)
             const todayWeatherAux = weathers.shift()
             const hightlightsCardsConfig = getHightlightsCardsConfig(todayWeatherAux)
-            console.log("teste", todayWeatherAux)
+
             setTodayWeather((prevState) => ({...prevState, ...todayWeatherAux}))
-            console.log("teste2", todayWeather)
             setWeathers((prevState) => (weathers))
             setHightlights((prevState) => (hightlightsCardsConfig))
         }
@@ -62,11 +68,11 @@ function Home(){
 
     const onCloseSearchMenu = () => {
         setIsSearchMenuOpen(false)
+        setPlaces([])
     }
 
-    const getWeathers = async (lat, long) => {
-        const woid = await getWoid(lat, long)
-        const weatherRawData = await getWeatherInfoByWoid(woid)
+    const getWeathers = async (woeid) => {
+        const weatherRawData = await getWeatherInfoByWoid(woeid)
         return weatherRawData
     }
 
@@ -75,8 +81,8 @@ function Home(){
         rawWeathers.consolidated_weather.forEach(rawWeather => {
             const img = `https://www.metaweather.com/static/img/weather/${rawWeather.weather_state_abbr}.svg`
             const date = dateFactory('teste', getFormattedDate(new Date(rawWeather.applicable_date).toUTCString())) 
-            const temperature = temperatureFactory(Math.floor(rawWeather.the_temp), Math.floor(rawWeather.max_temp),  Math.floor(rawWeather.min_temp))
-            const hightlights = hightlightsFactory(rawWeather.wind_speed, rawWeather.humidity, rawWeather.air_pressure, Math.floor(rawWeather.visibility))
+            const temperature = temperatureFactory(Math.floor(rawWeather.the_temp) + '°C', Math.floor(rawWeather.max_temp) + '°C',  Math.floor(rawWeather.min_temp) + '°C')
+            const hightlights = hightlightsFactory(Math.floor(rawWeather.wind_speed) + ' mph', rawWeather.humidity + '%', Math.floor(rawWeather.air_pressure) + ' mb', Math.floor(rawWeather.visibility) + ' miles')
 
             const weather = weatherFactory(
                 temperature, 
@@ -105,7 +111,7 @@ function Home(){
         })
     }
 
-    const getWoid = (lat, long) => {
+    const getWoeid = (lat, long) => {
         return new Promise(async (resolve, reject) => {
             try{
                 const response = await Api.get(`location/search/?lattlong=${lat},${long}`)
@@ -134,7 +140,7 @@ function Home(){
         return [
             {
                 header:'Wind status',
-                title: Math.floor(todayWeather.hightlights.wind)
+                title: todayWeather.hightlights.wind
             },
             {
                 header:'Humidity',
@@ -191,6 +197,65 @@ function Home(){
         return dateArray[0] + dateArray[1] + dateArray[2]
     }
 
+    const onSearchPlaces = async (placeName) => {
+        if(placeName){
+            try{
+              const places = await getPlaceByName(placeName)
+              setPlaces((prevState) => (places))
+            }
+            catch(error){
+                console.log('error teste', error)
+            }
+            
+        }
+    }
+
+    const getPlaceByName = (placeName) => {
+        return new Promise((resolve, reject) => {
+            Api.get(`/api/location/search/?query=${placeName}`)
+            .then(
+                (response) => {
+                    resolve(response.data)
+                },
+                (error) => {
+                    reject(error)
+                }
+            )
+        })
+    }
+
+    const onClickPlace = (woeid) => {
+        startWeatherData(woeid)
+    }
+
+    const setSkeletons = () => {
+        setTodayWeather(prev => {
+            return {
+                ...prev,
+                temperature: {
+                    default:null,
+                    min: null,
+                    max: null
+                },
+                local: null,
+                situation: null,
+                date: {
+                    title: null,
+                    fullDate: null
+                },
+                imgUrl: null,
+                hightlights: {
+                    wind: null,
+                    humidity: null,
+                    airPressure: null,
+                    visibility: null
+                }
+            }
+        })
+        setWeathers([null,null,null,null,null])
+        setHightlights([null,null,null,null])
+    }
+
     return (
         <Box component="section" className="home-container" display="flex" bgcolor="primary.dark" color="primary.contrastText">
             <SideMenu weatherConfig = {todayWeather} onOpenSearchMenu={onOpenSearchMenu}></SideMenu>
@@ -232,7 +297,14 @@ function Home(){
                     </Box>
                 </Box>
             </Box>
-            <SearchMenu open={isSearchMenuOpen} onClose={onCloseSearchMenu}></SearchMenu>
+            <SearchMenu 
+                open={isSearchMenuOpen} 
+                onClose={onCloseSearchMenu} 
+                onSearchPlaces = {onSearchPlaces} 
+                places={places}
+                onClickPlace={onClickPlace}
+                >
+            </SearchMenu>
         </Box> 
     )
 }

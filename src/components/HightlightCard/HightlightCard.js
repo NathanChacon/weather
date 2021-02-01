@@ -16,7 +16,7 @@ function  HightlightCard (props){
             <Typography variant="h6">
                 {hightlight.header}
             </Typography>
-            <Typography variant="h1">
+            <Typography variant="h2">
                 {hightlight.title}
             </Typography>
         </Box>

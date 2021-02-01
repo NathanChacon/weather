@@ -24,11 +24,6 @@ function SideMenu(props){
                             Search for places
                         </Typography>
                     </Button>
-                    <Button variant="contained"  color="primary" >
-                        <Typography variant="button">
-                                ?
-                        </Typography>
-                    </Button>
                 </Box>
                 <Box className="clouds-container" display="flex" alignItems="center" justifyContent="center">
                     {
@@ -63,7 +58,7 @@ function SideMenu(props){
                     <Typography variant="body2" style={{width:'100%'}}>
                         {
                             weatherConfig.date.title && weatherConfig.date.fullDate ?
-                            weatherConfig.date.title + ' . ' + weatherConfig.date.fullDate
+                            'today' + ' . ' + weatherConfig.date.fullDate
                             :
                             <Skeleton width="100%" variant="text" animation="wave"></Skeleton>
                         }

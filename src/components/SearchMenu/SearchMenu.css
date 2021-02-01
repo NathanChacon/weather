@@ -3,3 +3,9 @@
     min-height: 100vh;
     position: relative;
 }
+
+@media (max-width:769px){
+    .search-menu-container{
+        width: 100vw;
+    }
+}
