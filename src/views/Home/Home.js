@@ -9,6 +9,7 @@ import Api from '../../utils/api/api'
 import { Typography } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid';
 import Skeleton from '@material-ui/lab/Skeleton';
+import SadCloud from '../../assets/imgs/Sad-Cloud.svg'
 function Home(){
     const [todayWeather, setTodayWeather] = useState({
         temperature: {
@@ -34,15 +35,22 @@ function Home(){
     const [hightlights, setHightlights] = useState([null,null,null,null])
     const [isSearchMenuOpen, setIsSearchMenuOpen] = useState(false)
     const [places, setPlaces] = useState([])
+    const [error, setError] = useState(false)
 
     useEffect(() => {
         setWeatherOfCurrentLocation()
     },[])
 
     const setWeatherOfCurrentLocation = async () => {
-        const position = await getCurrentPosition()
-        const woeid = await getWoeid(position.coords.latitude, position.coords.longitude)
-        startWeatherData(woeid)
+        try{
+            const position = await getCurrentPosition()
+            const woeid = await getWoeid(position.coords.latitude, position.coords.longitude)
+            startWeatherData(woeid)
+            setError(false)
+        }
+        catch(error){
+            setError(true)
+        }   
     }
 
     const startWeatherData = async (woeid) => {
@@ -56,9 +64,10 @@ function Home(){
             setTodayWeather((prevState) => ({...prevState, ...todayWeatherAux}))
             setWeathers((prevState) => (weathers))
             setHightlights((prevState) => (hightlightsCardsConfig))
+            setError(false)
         }
         catch(error){
-            console.log('error', error)
+            setError(true)
         }
     }
 
@@ -82,7 +91,7 @@ function Home(){
             const img = `https://www.metaweather.com/static/img/weather/${rawWeather.weather_state_abbr}.svg`
             const date = dateFactory('teste', getFormattedDate(new Date(rawWeather.applicable_date).toUTCString())) 
             const temperature = temperatureFactory(Math.floor(rawWeather.the_temp) + '°C', Math.floor(rawWeather.max_temp) + '°C',  Math.floor(rawWeather.min_temp) + '°C')
-            const hightlights = hightlightsFactory(Math.floor(rawWeather.wind_speed) + ' mph', rawWeather.humidity + '%', Math.floor(rawWeather.air_pressure) + ' mb', Math.floor(rawWeather.visibility) + ' miles')
+            const hightlights = hightlightsFactory(Math.floor(rawWeather.wind_speed) + ' mph', {title: rawWeather.humidity + '%', progress: rawWeather.humidity}, Math.floor(rawWeather.air_pressure) + ' mb', Math.floor(rawWeather.visibility) + ' miles')
 
             const weather = weatherFactory(
                 temperature, 
@@ -101,9 +110,14 @@ function Home(){
     const getCurrentPosition = () => {
         return new Promise((resolve, reject) => {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    resolve(position)
-                })
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        resolve(position)
+                    },
+                    (error) => {
+                        reject("Cannot get position")
+                    }
+                )
             } 
             else {
                 reject("Cannot get position")
@@ -137,21 +151,28 @@ function Home(){
     }
 
     const getHightlightsCardsConfig = (todayWeather) => {
+        console.log("testee", todayWeather)
         return [
             {
                 header:'Wind status',
+                progress: null,
                 title: todayWeather.hightlights.wind
             },
             {
                 header:'Humidity',
-                title: todayWeather.hightlights.humidity
+                progress: {
+                    value: todayWeather.hightlights.humidity.progress
+                },
+                title: todayWeather.hightlights.humidity.title
             },
             {
                 header:'Visibility',
+                progress: null,
                 title: todayWeather.hightlights.visibility
             },
             {   
                 header: 'Air pressure',
+                progress: null,
                 title: todayWeather.hightlights.airPressure
             }
         ]
@@ -260,42 +281,55 @@ function Home(){
         <Box component="section" className="home-container" display="flex" bgcolor="primary.dark" color="primary.contrastText">
             <SideMenu weatherConfig = {todayWeather} onOpenSearchMenu={onOpenSearchMenu}></SideMenu>
             <Box className="main-wrapper" display="flex" justifyContent="center">
-                <Box className="main-content" pt={5} paddingBottom={5}>
-                    <Grid container className="cards-container" spacing={2}>
-                        {
-                            weathers.map((weather, index) => {
-                                return <Grid item xs={6} sm={6} md={6} lg={4}>
-                                            {weather ? 
-                                                <WeatherCard key={index} weatherConfig = {weather}></WeatherCard>
-                                                :
-                                                <Skeleton height='100%' animation="wave"/>
-                                            }
-                                        </Grid> 
-                            })
-                        }
-                    </Grid>
-                    <Box className="cards-hightlights-container" style={{width:"100%"}} display="flex" flexDirection="column" mt={3}>
-                        <Box style={{width:'100%'}} mb={2}>
-                            <Typography variant="h5">
-                                Today`s HightLights
-                            </Typography>
-                        </Box>
-                        <Grid container spacing={2}>
-                            {
-                                hightlights.map((hightlight, index) => {
-                                    return<Grid item xs={12} sm={12} md={12} lg={6}>
-                                            {
-                                                hightlight ?
-                                                <HightlightCard hightlight = {hightlight} key={index} width="100%"></HightlightCard>
-                                                :
-                                                <Skeleton height="200px" animation="wave"/>
-                                             }
-                                            </Grid>
-                                })
-                            }
-                        </Grid>
+                {
+                    !error ?
+                            <Box className="main-content" pt={5} paddingBottom={5}>
+                                <Grid container className="cards-container" spacing={2}>
+                                    {
+                                        weathers.map((weather, index) => {
+                                            return <Grid item xs={6} sm={6} md={6} lg={4}>
+                                                        {weather ? 
+                                                            <WeatherCard key={index} weatherConfig = {weather}></WeatherCard>
+                                                            :
+                                                            <Skeleton height='100%' animation="wave"/>
+                                                        }
+                                                    </Grid> 
+                                        })
+                                    }
+                                </Grid>
+                                <Box className="cards-hightlights-container" style={{width:"100%"}} display="flex" flexDirection="column" mt={3}>
+                                    <Box style={{width:'100%'}} mb={2}>
+                                        <Typography variant="h5">
+                                            Today`s HightLights
+                                        </Typography>
+                                    </Box>
+                                    <Grid container spacing={2}>
+                                        {
+                                            hightlights.map((hightlight, index) => {
+                                                return<Grid item xs={12} sm={12} md={12} lg={6}>
+                                                        {
+                                                            hightlight ?
+                                                            <HightlightCard hightlight = {hightlight} key={index} width="100%" progress={hightlight.progress}></HightlightCard>
+                                                            :
+                                                            <Skeleton height="200px" animation="wave"/>
+                                                        }
+                                                        </Grid>
+                                            })
+                                        }
+                                    </Grid>
+                                </Box>
+                                <Box mt={12}>
+                                    <Typography variant="body1" style={{textAlign:"center"}}>
+                                        Nathan Chacon @ DevChallenges.io
+                                    </Typography>
+                                </Box>
+                            </Box>
+                :
+                    <Box display="flex" alignItems="center" justifyContent="center">
+                        <img src={SadCloud}></img>
                     </Box>
-                </Box>
+                }
+
             </Box>
             <SearchMenu 
                 open={isSearchMenuOpen} 
