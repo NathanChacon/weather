@@ -27,7 +27,7 @@
     height: 250px;
 }
 
-@media (max-width:769px){
+@media (max-width:1000px){
     .side-menu-container{
         width: 100%;
     }
