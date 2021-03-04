@@ -49,7 +49,9 @@ function Home(){
             setError(false)
         }
         catch(error){
-            setError(true)
+            const places = await getPlaceByName('rio de janeiro')
+            const woeid = places[0].woeid
+            startWeatherData(woeid)
         }   
     }
 
@@ -151,7 +153,6 @@ function Home(){
     }
 
     const getHightlightsCardsConfig = (todayWeather) => {
-        console.log("testee", todayWeather)
         return [
             {
                 header:'Wind status',
