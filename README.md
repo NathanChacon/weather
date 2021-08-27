@@ -1,4 +1,7 @@
-# Build With
+# About The Project
+* Search for weather information typing the location that you want
+
+# Built With
 * JS
 * CSS
 * HTML
