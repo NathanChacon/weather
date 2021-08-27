@@ -1,5 +1,5 @@
 # About The Project
-* Search for weather information typing the location that you want. Example: Lisboa, Moscow
+* Search for weather information by typing the location that you want. Example: Lisboa, Moscow
 
 # Built With
 * JS
